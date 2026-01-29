@@ -482,7 +482,7 @@ if __name__ == "__main__":
         return (x ** 2)
     
     grapher6 = FunctionGrapher(square, x_range=(-5, 10))
-    (grapher6.create_plot(title="Square Function: f(x) = 1/(x-2)")
+    (grapher6.create_plot(title="Square Function: f(x) = x²")
               .plot_function(color='blue', label='f(x)')
               .plot_derivative(color='red', label="f'(x)")
               .plot_asymptotes()

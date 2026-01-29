@@ -1,0 +1,1879 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>Mathematical Function Grapher</title>
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="Real-time mathematical function grapher by Arezki Cherfouh. Visualize functions, derivatives, critical points, roots, inflection points, and asymptotes interactively."
+    />
+    <meta
+      name="keywords"
+      content="Function Grapher, Mathematical Visualization, Derivatives, Critical Points, Roots, Inflection Points, Asymptotes, Math Analyzer, Arezki Cherfouh"
+    />
+    <meta name="author" content="Arezki Cherfouh" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="∫ Function Grapher" />
+    <meta property="og:title" content="Mathematical Function Grapher" />
+    <meta
+      property="og:description"
+      content="Explore and analyze mathematical functions in real-time. View derivatives, critical points, roots, inflection points, and asymptotes interactively."
+    />
+    <meta property="og:image" content="/favicon.ico" />
+    <meta
+      property="og:image:alt"
+      content="∫ Function Grapher Logo or Screenshot"
+    />
+    <meta property="og:image:type" content="image/ico" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mathematical Function Grapher" />
+    <meta
+      name="twitter:description"
+      content="Interactive mathematical function grapher with derivatives, critical points, roots, inflection points, and asymptotes."
+    />
+    <meta name="twitter:image" content="/favicon.ico" />
+    <meta
+      name="twitter:image:alt"
+      content="∫ Function Grapher Logo or Screenshot"
+    />
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.2.1/math.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=JetBrains+Mono:wght@300;500;700&family=Spectral:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0a0e27;
+        --bg-secondary: #1a1f3a;
+        --bg-tertiary: #252b4a;
+        --text-primary: #e4e8f0;
+        --text-secondary: #9ca3af;
+        --accent-primary: #6366f1;
+        --accent-secondary: #8b5cf6;
+        --accent-tertiary: #ec4899;
+        --border-color: #374151;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --error: #ef4444;
+        --shadow: rgba(0, 0, 0, 0.3);
+        --glass-bg: rgba(26, 31, 58, 0.7);
+        --glass-border: rgba(99, 102, 241, 0.2);
+      }
+
+      [data-theme="light"] {
+        --bg-primary: #f8fafc;
+        --bg-secondary: #ffffff;
+        --bg-tertiary: #f1f5f9;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --accent-primary: #4f46e5;
+        --accent-secondary: #7c3aed;
+        --accent-tertiary: #db2777;
+        --border-color: #e2e8f0;
+        --success: #059669;
+        --warning: #d97706;
+        --error: #dc2626;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(79, 70, 229, 0.2);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Spectral", serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        transition:
+          background 0.3s ease,
+          color 0.3s ease;
+        overflow-x: auto;
+      }
+
+      body:not(.has-overflow) {
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+          radial-gradient(
+            circle at 20% 30%,
+            rgba(99, 102, 241, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 70%,
+            rgba(139, 92, 246, 0.1) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.8s ease;
+      }
+
+      h1 {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--accent-primary),
+          var(--accent-secondary),
+          var(--accent-tertiary)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+        cursor: default;
+      }
+
+      @media (pointer: fine) {
+        h1 {
+          cursor: pointer;
+        }
+      }
+
+      .subtitle {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 400;
+        letter-spacing: 0.05em;
+      }
+
+      .theme-toggle {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        cursor: default;
+      }
+
+      @media (pointer: fine) {
+        .theme-toggle {
+          cursor: pointer;
+        }
+      }
+
+      .theme-toggle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px var(--shadow);
+      }
+
+      .legend-toggle {
+        position: fixed;
+        top: 2rem;
+        right: 10rem;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        cursor: default;
+      }
+
+      @media (pointer: fine) {
+        .legend-toggle {
+          cursor: pointer;
+        }
+      }
+
+      .legend-toggle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px var(--shadow);
+      }
+
+      @media (max-width: 768px) {
+        .legend-toggle {
+          top: 5rem;
+          right: 2rem;
+        }
+      }
+
+      .input-section {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.8s ease;
+      }
+
+      .input-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: block;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+
+      .range-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .control-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        cursor: default;
+      }
+
+      @media (pointer: fine) {
+        .control-item {
+          cursor: pointer;
+        }
+      }
+
+      .control-item:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--accent-primary);
+      }
+
+      .checkbox {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+        position: relative;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+      }
+
+      .control-item input[type="checkbox"]:checked + .checkbox {
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
+      }
+
+      .control-item input[type="checkbox"]:checked + .checkbox::after {
+        content: "✓";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      .control-item input[type="checkbox"] {
+        display: none;
+      }
+
+      .control-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        flex: 1;
+      }
+
+      .tangent-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .tangent-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+
+      .tangent-input-group {
+        flex: 1;
+        min-width: 150px;
+      }
+
+      .btn {
+        padding: 1rem 2rem;
+        background: var(--accent-primary);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: default;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      @media (pointer: fine) {
+        .btn {
+          cursor: pointer;
+        }
+      }
+
+      .btn:hover {
+        background: var(--accent-secondary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px var(--shadow);
+      }
+
+      .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+      }
+
+      .tangent-list {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .tangent-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--bg-tertiary);
+        border-radius: 20px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.875rem;
+        border: 1px solid var(--border-color);
+      }
+
+      .tangent-tag .remove-btn {
+        background: none;
+        border: none;
+        color: var(--error);
+        cursor: default;
+        font-size: 1rem;
+        padding: 0;
+        line-height: 1;
+        transition: transform 0.2s ease;
+      }
+
+      @media (pointer: fine) {
+        .tangent-tag .remove-btn {
+          cursor: pointer;
+        }
+      }
+
+      .tangent-tag .remove-btn:hover {
+        transform: scale(1.2);
+      }
+
+      .graph-container {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 1s ease;
+      }
+
+      #graph {
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .analysis-section {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        animation: fadeInUp 1.2s ease;
+      }
+
+      .analysis-title {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+        cursor: default;
+      }
+
+      @media (pointer: fine) {
+        .analysis-title {
+          cursor: pointer;
+        }
+      }
+
+      .analysis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .analysis-card {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border-left: 4px solid var(--accent-primary);
+      }
+
+      .analysis-card h3 {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1rem;
+        color: var(--accent-primary);
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: default;
+      }
+
+      @media (pointer: fine) {
+        .analysis-card h3 {
+          cursor: pointer;
+        }
+      }
+
+      .analysis-card pre {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        line-height: 1.6;
+      }
+
+      .analysis-card .math-expr {
+        color: var(--accent-secondary);
+        font-weight: 500;
+      }
+
+      .analysis-card .value {
+        color: var(--accent-tertiary);
+        font-weight: 600;
+      }
+
+      .error-message {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid var(--error);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-family: "IBM Plex Mono", monospace;
+        color: var(--error);
+        font-size: 0.875rem;
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2rem;
+        }
+
+        .range-inputs {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .controls-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .analysis-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .container {
+          padding: 1rem;
+        }
+
+        .tangent-controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .tangent-input-group {
+          width: 100%;
+        }
+      }
+
+      .color-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-left: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-icon">🌙</span>
+      <span id="theme-text">Dark</span>
+    </div>
+
+    <div class="legend-toggle" onclick="toggleLegend()">
+      <span id="legend-icon">📊</span>
+      <span id="legend-text">Legend</span>
+    </div>
+
+    <div class="container">
+      <header>
+        <h1>∫ Function Grapher</h1>
+        <p class="subtitle">Real-time mathematical visualization & analysis</p>
+      </header>
+
+      <div class="input-section">
+        <div class="input-group">
+          <label for="function-input">Function f(x)</label>
+          <input
+            type="text"
+            id="function-input"
+            placeholder="e.g., x^2, sin(x), (x²-1)/(x-1)"
+            value="x^2"
+          />
+        </div>
+
+        <div class="range-inputs">
+          <div class="input-group">
+            <label for="x-min">X Min</label>
+            <input type="number" id="x-min" value="-10" step="0.1" />
+          </div>
+          <div class="input-group">
+            <label for="x-max">X Max</label>
+            <input type="number" id="x-max" value="10" step="0.1" />
+          </div>
+          <div class="input-group">
+            <label for="y-min">Y Min</label>
+            <input type="number" id="y-min" value="-10" step="0.1" />
+          </div>
+          <div class="input-group">
+            <label for="y-max">Y Max</label>
+            <input type="number" id="y-max" value="10" step="0.1" />
+          </div>
+        </div>
+
+        <div class="controls-grid">
+          <label class="control-item">
+            <input type="checkbox" id="show-function" checked />
+            <div class="checkbox"></div>
+            <span class="control-label">Function f(x)</span>
+            <div class="color-indicator" style="background: #1f77b4"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-derivative" checked />
+            <div class="checkbox"></div>
+            <span class="control-label">First Derivative f'(x)</span>
+            <div class="color-indicator" style="background: #ff7f0e"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-second-derivative" />
+            <div class="checkbox"></div>
+            <span class="control-label">Second Derivative f''(x)</span>
+            <div class="color-indicator" style="background: #2ca02c"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-critical" checked />
+            <div class="checkbox"></div>
+            <span class="control-label">Critical Points</span>
+            <div class="color-indicator" style="background: #d62728"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-roots" checked />
+            <div class="checkbox"></div>
+            <span class="control-label">Roots (Zeros)</span>
+            <div class="color-indicator" style="background: #9467bd"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-inflection" />
+            <div class="checkbox"></div>
+            <span class="control-label">Inflection Points</span>
+            <div class="color-indicator" style="background: #8c564b"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-undefined" checked />
+            <div class="checkbox"></div>
+            <span class="control-label">Undefined (Holes)</span>
+            <div class="color-indicator" style="background: #ff0000"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-vertical-asymptotes" checked />
+            <div class="checkbox"></div>
+            <span class="control-label">Vertical Asymptotes</span>
+            <div class="color-indicator" style="background: #e377c2"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-horizontal-asymptote" />
+            <div class="checkbox"></div>
+            <span class="control-label">Horizontal Asymptote</span>
+            <div class="color-indicator" style="background: #7f7f7f"></div>
+          </label>
+
+          <label class="control-item">
+            <input type="checkbox" id="show-oblique-asymptote" />
+            <div class="checkbox"></div>
+            <span class="control-label">Oblique Asymptote</span>
+            <div class="color-indicator" style="background: #17becf"></div>
+          </label>
+        </div>
+
+        <div class="tangent-section">
+          <label>Add Tangent Line</label>
+          <div class="tangent-controls">
+            <div class="tangent-input-group">
+              <label for="tangent-x">X-coordinate</label>
+              <input
+                type="number"
+                id="tangent-x"
+                placeholder="e.g., 2"
+                step="0.1"
+              />
+            </div>
+            <button class="btn" onclick="addTangent()">Add Tangent</button>
+          </div>
+          <div class="tangent-list" id="tangent-list"></div>
+        </div>
+      </div>
+
+      <div class="graph-container">
+        <div id="graph"></div>
+      </div>
+
+      <div class="analysis-section">
+        <h2 class="analysis-title">Mathematical Analysis</h2>
+        <div class="analysis-grid" id="analysis-grid"></div>
+      </div>
+    </div>
+
+    <script>
+      // Theme management
+      function initTheme() {
+        const savedTheme = localStorage.getItem("math-grapher-theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        const theme = savedTheme || (prefersDark ? "dark" : "light");
+        setTheme(theme);
+      }
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        document.getElementById("theme-icon").textContent =
+          theme === "dark" ? "🌙" : "☀️";
+        document.getElementById("theme-text").textContent =
+          theme === "dark" ? "Dark" : "Light";
+      }
+
+      function toggleTheme() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme") || "dark";
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        setTheme(newTheme);
+        localStorage.setItem("math-grapher-theme", newTheme);
+        updateGraph();
+      }
+
+      // Initialize theme
+      initTheme();
+
+      // Legend visibility state
+      let showLegend = true;
+
+      function toggleLegend() {
+        showLegend = !showLegend;
+        document.getElementById("legend-text").textContent = showLegend
+          ? "Legend"
+          : "Legend";
+        updateGraph();
+      }
+
+      // Tangent lines management
+      let tangentLines = [];
+
+      function addTangent() {
+        const xInput = document.getElementById("tangent-x");
+        const x = parseFloat(xInput.value);
+
+        if (isNaN(x)) {
+          return;
+        }
+
+        // Check if tangent already exists
+        if (tangentLines.includes(x)) {
+          return;
+        }
+
+        tangentLines.push(x);
+        xInput.value = "";
+        updateTangentList();
+        updateGraph();
+      }
+
+      function removeTangent(x) {
+        tangentLines = tangentLines.filter((t) => t !== x);
+        updateTangentList();
+        updateGraph();
+      }
+
+      function updateTangentList() {
+        const list = document.getElementById("tangent-list");
+        list.innerHTML = "";
+
+        tangentLines.forEach((x) => {
+          const tag = document.createElement("div");
+          tag.className = "tangent-tag";
+          tag.innerHTML = `
+                    <span>Tangent at x = ${x.toFixed(2)}</span>
+                    <button class="remove-btn" onclick="removeTangent(${x})">×</button>
+                `;
+          list.appendChild(tag);
+        });
+      }
+
+      // Symbol normalization
+      function normalizeFunction(input) {
+        let normalized = input;
+
+        // Handle superscript numbers
+        normalized = normalized.replace(/²/g, "^2");
+        normalized = normalized.replace(/³/g, "^3");
+        normalized = normalized.replace(/⁴/g, "^4");
+        normalized = normalized.replace(/⁵/g, "^5");
+        normalized = normalized.replace(/⁶/g, "^6");
+
+        // Convert ** to ^
+        normalized = normalized.replace(/\*\*/g, "^");
+
+        // Auto-close brackets
+        const openParen = (normalized.match(/\(/g) || []).length;
+        const closeParen = (normalized.match(/\)/g) || []).length;
+        if (openParen > closeParen) {
+          normalized += ")".repeat(openParen - closeParen);
+        }
+
+        // Auto-close brackets for square brackets
+        const openSquare = (normalized.match(/\[/g) || []).length;
+        const closeSquare = (normalized.match(/\]/g) || []).length;
+        if (openSquare > closeSquare) {
+          normalized += "]".repeat(openSquare - closeSquare);
+        }
+
+        // Replace common math functions
+        normalized = normalized.replace(/sqrt/gi, "sqrt");
+        normalized = normalized.replace(/abs/gi, "abs");
+
+        return normalized;
+      }
+
+      // Mathematical computation class
+      class MathAnalyzer {
+        constructor(funcStr, xRange, numPoints = 1000) {
+          this.funcStr = normalizeFunction(funcStr);
+          this.xRange = xRange;
+          this.numPoints = numPoints;
+          this.errors = [];
+
+          try {
+            // Parse the function
+            this.node = math.parse(this.funcStr);
+            this.func = this.node.compile();
+
+            // Keep original for undefined detection
+            this.funcOriginal = this.func;
+
+            // Create derivative
+            this.derivNode = math.derivative(this.node, "x");
+            this.deriv = this.derivNode.compile();
+
+            // Create second derivative
+            this.secondDerivNode = math.derivative(this.derivNode, "x");
+            this.secondDeriv = this.secondDerivNode.compile();
+          } catch (e) {
+            this.errors.push(`Parse error: ${e.message}`);
+            this.node = null;
+            this.func = null;
+          }
+        }
+
+        evaluate(x) {
+          try {
+            const result = this.func.evaluate({ x: x });
+            return isFinite(result) ? result : NaN;
+          } catch (e) {
+            return NaN;
+          }
+        }
+
+        evaluateDerivative(x) {
+          try {
+            const result = this.deriv.evaluate({ x: x });
+            return isFinite(result) ? result : NaN;
+          } catch (e) {
+            return NaN;
+          }
+        }
+
+        evaluateSecondDerivative(x) {
+          try {
+            const result = this.secondDeriv.evaluate({ x: x });
+            return isFinite(result) ? result : NaN;
+          } catch (e) {
+            return NaN;
+          }
+        }
+
+        // Calculate derivative using limit for tangent lines
+        evaluateDerivativeLimit(x, direction = "both") {
+          const h = 1e-7;
+
+          if (direction === "left") {
+            // Left derivative
+            const f_x = this.evaluate(x);
+            const f_x_h = this.evaluate(x - h);
+            return (f_x - f_x_h) / h;
+          } else if (direction === "right") {
+            // Right derivative
+            const f_x = this.evaluate(x);
+            const f_x_h = this.evaluate(x + h);
+            return (f_x_h - f_x) / h;
+          } else {
+            // Central difference (both)
+            const f_x_h = this.evaluate(x + h);
+            const f_x_h_neg = this.evaluate(x - h);
+            return (f_x_h - f_x_h_neg) / (2 * h);
+          }
+        }
+
+        generatePoints() {
+          const [xMin, xMax] = this.xRange;
+          const step = (xMax - xMin) / this.numPoints;
+          const points = { x: [], y: [] };
+
+          for (let i = 0; i <= this.numPoints; i++) {
+            const x = xMin + i * step;
+            const y = this.evaluate(x);
+            points.x.push(x);
+            points.y.push(y);
+          }
+
+          return points;
+        }
+
+        generateDerivativePoints() {
+          const [xMin, xMax] = this.xRange;
+          const step = (xMax - xMin) / this.numPoints;
+          const points = { x: [], y: [] };
+
+          for (let i = 0; i <= this.numPoints; i++) {
+            const x = xMin + i * step;
+            const y = this.evaluateDerivative(x);
+            points.x.push(x);
+            points.y.push(y);
+          }
+
+          return points;
+        }
+
+        generateSecondDerivativePoints() {
+          const [xMin, xMax] = this.xRange;
+          const step = (xMax - xMin) / this.numPoints;
+          const points = { x: [], y: [] };
+
+          for (let i = 0; i <= this.numPoints; i++) {
+            const x = xMin + i * step;
+            const y = this.evaluateSecondDerivative(x);
+            points.x.push(x);
+            points.y.push(y);
+          }
+
+          return points;
+        }
+
+        findRoots() {
+          const [xMin, xMax] = this.xRange;
+          const step = (xMax - xMin) / 1000;
+          const roots = [];
+          let prevY = this.evaluate(xMin);
+
+          for (let x = xMin + step; x <= xMax; x += step) {
+            const y = this.evaluate(x);
+            if (!isNaN(y) && !isNaN(prevY)) {
+              // Sign change indicates a root
+              if (prevY * y < 0 || Math.abs(y) < 0.001) {
+                // Refine using bisection
+                const root = this.bisectionMethod(x - step, x);
+                if (
+                  root !== null &&
+                  !roots.some((r) => Math.abs(r - root) < 0.01)
+                ) {
+                  roots.push(root);
+                }
+              }
+            }
+            prevY = y;
+          }
+
+          return roots;
+        }
+
+        bisectionMethod(a, b, tolerance = 0.0001, maxIter = 50) {
+          let fa = this.evaluate(a);
+          let fb = this.evaluate(b);
+
+          if (fa * fb > 0) return null;
+
+          for (let i = 0; i < maxIter; i++) {
+            const c = (a + b) / 2;
+            const fc = this.evaluate(c);
+
+            if (Math.abs(fc) < tolerance || (b - a) / 2 < tolerance) {
+              return c;
+            }
+
+            if (fa * fc < 0) {
+              b = c;
+              fb = fc;
+            } else {
+              a = c;
+              fa = fc;
+            }
+          }
+
+          return (a + b) / 2;
+        }
+
+        findCriticalPoints() {
+          const [xMin, xMax] = this.xRange;
+          const step = (xMax - xMin) / 1000;
+          const criticalPoints = [];
+          let prevDy = this.evaluateDerivative(xMin);
+
+          for (let x = xMin + step; x <= xMax; x += step) {
+            const dy = this.evaluateDerivative(x);
+            if (!isNaN(dy) && !isNaN(prevDy)) {
+              if (prevDy * dy < 0 || Math.abs(dy) < 0.001) {
+                const critX = this.bisectionDerivative(x - step, x);
+                if (
+                  critX !== null &&
+                  !criticalPoints.some((p) => Math.abs(p.x - critX) < 0.01)
+                ) {
+                  const critY = this.evaluate(critX);
+                  if (!isNaN(critY)) {
+                    criticalPoints.push({ x: critX, y: critY });
+                  }
+                }
+              }
+            }
+            prevDy = dy;
+          }
+
+          return criticalPoints;
+        }
+
+        bisectionDerivative(a, b, tolerance = 0.0001, maxIter = 50) {
+          let fa = this.evaluateDerivative(a);
+          let fb = this.evaluateDerivative(b);
+
+          if (fa * fb > 0) return null;
+
+          for (let i = 0; i < maxIter; i++) {
+            const c = (a + b) / 2;
+            const fc = this.evaluateDerivative(c);
+
+            if (Math.abs(fc) < tolerance || (b - a) / 2 < tolerance) {
+              return c;
+            }
+
+            if (fa * fc < 0) {
+              b = c;
+              fb = fc;
+            } else {
+              a = c;
+              fa = fc;
+            }
+          }
+
+          return (a + b) / 2;
+        }
+
+        findInflectionPoints() {
+          const [xMin, xMax] = this.xRange;
+          const step = (xMax - xMin) / 1000;
+          const inflectionPoints = [];
+          let prevDdy = this.evaluateSecondDerivative(xMin);
+
+          for (let x = xMin + step; x <= xMax; x += step) {
+            const ddy = this.evaluateSecondDerivative(x);
+            if (!isNaN(ddy) && !isNaN(prevDdy)) {
+              if (prevDdy * ddy < 0 || Math.abs(ddy) < 0.001) {
+                const inflX = this.bisectionSecondDerivative(x - step, x);
+                if (
+                  inflX !== null &&
+                  !inflectionPoints.some((p) => Math.abs(p.x - inflX) < 0.01)
+                ) {
+                  const inflY = this.evaluate(inflX);
+                  if (!isNaN(inflY)) {
+                    inflectionPoints.push({ x: inflX, y: inflY });
+                  }
+                }
+              }
+            }
+            prevDdy = ddy;
+          }
+
+          return inflectionPoints;
+        }
+
+        bisectionSecondDerivative(a, b, tolerance = 0.0001, maxIter = 50) {
+          let fa = this.evaluateSecondDerivative(a);
+          let fb = this.evaluateSecondDerivative(b);
+
+          if (fa * fb > 0) return null;
+
+          for (let i = 0; i < maxIter; i++) {
+            const c = (a + b) / 2;
+            const fc = this.evaluateSecondDerivative(c);
+
+            if (Math.abs(fc) < tolerance || (b - a) / 2 < tolerance) {
+              return c;
+            }
+
+            if (fa * fc < 0) {
+              b = c;
+              fb = fc;
+            } else {
+              a = c;
+              fa = fc;
+            }
+          }
+
+          return (a + b) / 2;
+        }
+
+        // Find undefined values (holes/removable discontinuities)
+        findUndefinedValues() {
+          const [xMin, xMax] = this.xRange;
+          const undefined = [];
+
+          try {
+            // Parse the original function string to detect rational expressions
+            const funcStr = this.funcStr;
+
+            // Check if function contains division (potential holes)
+            if (!funcStr.includes("/")) {
+              return [];
+            }
+
+            // Find points where function is undefined but limit exists
+            const step = (xMax - xMin) / 1000;
+
+            for (let x = xMin; x <= xMax; x += step) {
+              const y = this.evaluate(x);
+
+              // If function is undefined at this point
+              if (isNaN(y) || !isFinite(y)) {
+                // Check if limit exists by evaluating nearby points
+                const h = 0.0001;
+                const leftVal = this.evaluate(x - h);
+                const rightVal = this.evaluate(x + h);
+
+                // If both sides converge to same finite value, it's a hole
+                if (
+                  isFinite(leftVal) &&
+                  isFinite(rightVal) &&
+                  Math.abs(leftVal - rightVal) < 0.01
+                ) {
+                  const limitVal = (leftVal + rightVal) / 2;
+
+                  // Check if not already in list
+                  if (!undefined.some((p) => Math.abs(p.x - x) < step * 2)) {
+                    undefined.push({ x: x, y: limitVal });
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Error finding undefined values:", e);
+          }
+
+          return undefined;
+        }
+
+        findVerticalAsymptotes() {
+          const [xMin, xMax] = this.xRange;
+          const step = (xMax - xMin) / 1000;
+          const asymptotes = [];
+          let prevY = this.evaluate(xMin);
+
+          for (let x = xMin + step; x <= xMax; x += step) {
+            const y = this.evaluate(x);
+
+            // Check for vertical asymptote (function jumps from finite to infinite or vice versa)
+            if (
+              (isFinite(prevY) && !isFinite(y)) ||
+              (!isFinite(prevY) && isFinite(y))
+            ) {
+              // Make sure it's not a hole by checking if limit exists
+              const h = 0.0001;
+              const leftVal = this.evaluate(x - h);
+              const rightVal = this.evaluate(x + h);
+
+              // If values diverge (not a hole), it's an asymptote
+              if (
+                !isFinite(leftVal) ||
+                !isFinite(rightVal) ||
+                Math.abs(leftVal - rightVal) > 10
+              ) {
+                if (!asymptotes.some((a) => Math.abs(a - x) < step * 2)) {
+                  asymptotes.push(x);
+                }
+              }
+            }
+            // Also check for very large changes
+            else if (
+              isFinite(prevY) &&
+              isFinite(y) &&
+              Math.abs(y - prevY) > 1000
+            ) {
+              if (!asymptotes.some((a) => Math.abs(a - x) < step * 2)) {
+                asymptotes.push(x);
+              }
+            }
+
+            prevY = y;
+          }
+
+          return asymptotes;
+        }
+
+        findHorizontalAsymptote() {
+          const farRight = this.evaluate(this.xRange[1] * 10);
+          const farLeft = this.evaluate(this.xRange[0] * 10);
+
+          if (
+            isFinite(farRight) &&
+            isFinite(farLeft) &&
+            Math.abs(farRight - farLeft) < 0.1
+          ) {
+            return (farRight + farLeft) / 2;
+          }
+
+          return null;
+        }
+
+        findObliqueAsymptote() {
+          // Check if horizontal asymptote exists first
+          if (this.findHorizontalAsymptote() !== null) {
+            return null;
+          }
+
+          const [xMin, xMax] = this.xRange;
+
+          // Calculate slope m = lim(x→∞) f(x)/x
+          const xLarge = Math.max(Math.abs(xMin), Math.abs(xMax)) * 10;
+
+          const f_pos = this.evaluate(xLarge);
+          const f_neg = this.evaluate(-xLarge);
+
+          if (!isFinite(f_pos) || !isFinite(f_neg)) {
+            return null;
+          }
+
+          const m_pos = f_pos / xLarge;
+          const m_neg = f_neg / -xLarge;
+
+          // Check if slopes are reasonable and similar
+          if (
+            !isFinite(m_pos) ||
+            !isFinite(m_neg) ||
+            Math.abs(m_pos) < 0.001 ||
+            Math.abs(m_neg) < 0.001
+          ) {
+            return null;
+          }
+
+          // If slopes are very different, might have different asymptotes (left/right)
+          if (Math.abs(m_pos - m_neg) > 0.1) {
+            return null;
+          }
+
+          const m = (m_pos + m_neg) / 2;
+
+          // Calculate intercept b = lim(x→∞) (f(x) - mx)
+          const b_pos = f_pos - m * xLarge;
+          const b_neg = f_neg - m * -xLarge;
+
+          if (!isFinite(b_pos) || !isFinite(b_neg)) {
+            return null;
+          }
+
+          // Check if intercepts are similar
+          if (Math.abs(b_pos - b_neg) > 1) {
+            return null;
+          }
+
+          const b = (b_pos + b_neg) / 2;
+
+          return { m, b };
+        }
+      }
+
+      let currentAnalyzer = null;
+
+      function updateGraph() {
+        const funcStr = document.getElementById("function-input").value;
+        const xMin = parseFloat(document.getElementById("x-min").value);
+        const xMax = parseFloat(document.getElementById("x-max").value);
+        const yMin = parseFloat(document.getElementById("y-min").value);
+        const yMax = parseFloat(document.getElementById("y-max").value);
+
+        if (!funcStr) return;
+
+        try {
+          currentAnalyzer = new MathAnalyzer(funcStr, [xMin, xMax]);
+
+          if (currentAnalyzer.errors.length > 0) {
+            showError(currentAnalyzer.errors.join(", "));
+            return;
+          }
+
+          const traces = [];
+
+          // Function trace
+          if (document.getElementById("show-function").checked) {
+            const points = currentAnalyzer.generatePoints();
+            traces.push({
+              x: points.x,
+              y: points.y,
+              type: "scatter",
+              mode: "lines",
+              name: "f(x)",
+              line: { color: "#1f77b4", width: 3 },
+            });
+          }
+
+          // First derivative
+          if (document.getElementById("show-derivative").checked) {
+            const points = currentAnalyzer.generateDerivativePoints();
+            traces.push({
+              x: points.x,
+              y: points.y,
+              type: "scatter",
+              mode: "lines",
+              name: "f'(x)",
+              line: { color: "#ff7f0e", width: 2, dash: "dash" },
+            });
+          }
+
+          // Second derivative
+          if (document.getElementById("show-second-derivative").checked) {
+            const points = currentAnalyzer.generateSecondDerivativePoints();
+            traces.push({
+              x: points.x,
+              y: points.y,
+              type: "scatter",
+              mode: "lines",
+              name: "f''(x)",
+              line: { color: "#2ca02c", width: 2, dash: "dot" },
+            });
+          }
+
+          // Critical points
+          if (document.getElementById("show-critical").checked) {
+            const criticalPoints = currentAnalyzer.findCriticalPoints();
+            if (criticalPoints.length > 0) {
+              traces.push({
+                x: criticalPoints.map((p) => p.x),
+                y: criticalPoints.map((p) => p.y),
+                type: "scatter",
+                mode: "markers",
+                name: "Critical Points",
+                marker: { color: "#d62728", size: 12, symbol: "circle" },
+              });
+            }
+          }
+
+          // Roots
+          if (document.getElementById("show-roots").checked) {
+            const roots = currentAnalyzer.findRoots();
+            if (roots.length > 0) {
+              traces.push({
+                x: roots,
+                y: roots.map(() => 0),
+                type: "scatter",
+                mode: "markers",
+                name: "Roots",
+                marker: { color: "#9467bd", size: 12, symbol: "square" },
+              });
+            }
+          }
+
+          // Inflection points
+          if (document.getElementById("show-inflection").checked) {
+            const inflectionPoints = currentAnalyzer.findInflectionPoints();
+            if (inflectionPoints.length > 0) {
+              traces.push({
+                x: inflectionPoints.map((p) => p.x),
+                y: inflectionPoints.map((p) => p.y),
+                type: "scatter",
+                mode: "markers",
+                name: "Inflection Points",
+                marker: { color: "#8c564b", size: 12, symbol: "triangle-up" },
+              });
+            }
+          }
+
+          // Undefined values (holes)
+          if (document.getElementById("show-undefined").checked) {
+            const undefinedValues = currentAnalyzer.findUndefinedValues();
+            if (undefinedValues.length > 0) {
+              traces.push({
+                x: undefinedValues.map((p) => p.x),
+                y: undefinedValues.map((p) => p.y),
+                type: "scatter",
+                mode: "markers",
+                name: "Undefined (Holes)",
+                marker: {
+                  color: "white",
+                  size: 14,
+                  symbol: "circle",
+                  line: { color: "#ff0000", width: 3 },
+                },
+              });
+            }
+          }
+
+          // Vertical asymptotes
+          if (document.getElementById("show-vertical-asymptotes").checked) {
+            const verticalAsymptotes = currentAnalyzer.findVerticalAsymptotes();
+            verticalAsymptotes.forEach((x) => {
+              traces.push({
+                x: [x, x],
+                y: [yMin, yMax],
+                type: "scatter",
+                mode: "lines",
+                name: `x = ${x.toFixed(2)}`,
+                line: { color: "#e377c2", width: 2, dash: "dashdot" },
+                showlegend: false,
+              });
+            });
+          }
+
+          // Horizontal asymptote
+          if (document.getElementById("show-horizontal-asymptote").checked) {
+            const horizontalAsymptote =
+              currentAnalyzer.findHorizontalAsymptote();
+            if (horizontalAsymptote !== null) {
+              traces.push({
+                x: [xMin, xMax],
+                y: [horizontalAsymptote, horizontalAsymptote],
+                type: "scatter",
+                mode: "lines",
+                name: `y = ${horizontalAsymptote.toFixed(2)}`,
+                line: { color: "#7f7f7f", width: 2, dash: "dashdot" },
+              });
+            }
+          }
+
+          // Oblique asymptote
+          if (document.getElementById("show-oblique-asymptote").checked) {
+            const obliqueAsymptote = currentAnalyzer.findObliqueAsymptote();
+            if (obliqueAsymptote !== null) {
+              const { m, b } = obliqueAsymptote;
+              const x_asymp = [xMin, xMax];
+              const y_asymp = x_asymp.map((x) => m * x + b);
+
+              traces.push({
+                x: x_asymp,
+                y: y_asymp,
+                type: "scatter",
+                mode: "lines",
+                name: `y = ${m.toFixed(2)}x + ${b.toFixed(2)}`,
+                line: { color: "#17becf", width: 2, dash: "dashdot" },
+              });
+            }
+          }
+
+          // Tangent lines
+          const tangentColors = [
+            "#2ca02c",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+          ];
+          tangentLines.forEach((x0, index) => {
+            const y0 = currentAnalyzer.evaluate(x0);
+
+            if (!isFinite(y0)) {
+              return;
+            }
+
+            // Calculate left and right derivatives using limit
+            const slopeLeft = currentAnalyzer.evaluateDerivativeLimit(
+              x0,
+              "left",
+            );
+            const slopeRight = currentAnalyzer.evaluateDerivativeLimit(
+              x0,
+              "right",
+            );
+
+            // Check if derivatives are different (discontinuous derivative)
+            const derivativeDiffers = Math.abs(slopeLeft - slopeRight) > 1e-6;
+
+            if (!isFinite(slopeLeft) && !isFinite(slopeRight)) {
+              return;
+            }
+
+            const extend = (xMax - xMin) * 0.15;
+            const baseColor = tangentColors[index % tangentColors.length];
+
+            if (
+              derivativeDiffers &&
+              isFinite(slopeLeft) &&
+              isFinite(slopeRight)
+            ) {
+              // Draw two different tangent lines (left and right)
+
+              // Left tangent
+              const x_tangent_left = [x0 - extend, x0];
+              const y_tangent_left = x_tangent_left.map(
+                (x) => y0 + slopeLeft * (x - x0),
+              );
+
+              traces.push({
+                x: x_tangent_left,
+                y: y_tangent_left,
+                type: "scatter",
+                mode: "lines",
+                name: `Left tangent at x=${x0.toFixed(2)}`,
+                line: {
+                  color: baseColor,
+                  width: 2.5,
+                  dash: "dot",
+                },
+              });
+
+              // Right tangent (slightly darker color)
+              const rgb = baseColor
+                .match(/\w\w/g)
+                .map((x) => parseInt(x, 16) / 255);
+              const darkerColor = `rgb(${Math.max(0, rgb[0] * 255 - 40)},${Math.max(0, rgb[1] * 255 - 40)},${Math.max(0, rgb[2] * 255 - 40)})`;
+
+              const x_tangent_right = [x0, x0 + extend];
+              const y_tangent_right = x_tangent_right.map(
+                (x) => y0 + slopeRight * (x - x0),
+              );
+
+              traces.push({
+                x: x_tangent_right,
+                y: y_tangent_right,
+                type: "scatter",
+                mode: "lines",
+                name: `Right tangent at x=${x0.toFixed(2)}`,
+                line: {
+                  color: darkerColor,
+                  width: 2.5,
+                  dash: "dot",
+                },
+              });
+            } else {
+              // Draw single tangent line
+              const slope = isFinite(slopeLeft) ? slopeLeft : slopeRight;
+
+              if (!isFinite(slope)) {
+                return;
+              }
+
+              const x_tangent = [x0 - extend, x0 + extend];
+              const y_tangent = x_tangent.map((x) => y0 + slope * (x - x0));
+
+              traces.push({
+                x: x_tangent,
+                y: y_tangent,
+                type: "scatter",
+                mode: "lines",
+                name: `Tangent at x=${x0.toFixed(2)}`,
+                line: {
+                  color: baseColor,
+                  width: 2.5,
+                  dash: "dot",
+                },
+              });
+            }
+
+            // Add point at tangent location
+            traces.push({
+              x: [x0],
+              y: [y0],
+              type: "scatter",
+              mode: "markers",
+              name: `Point at x=${x0.toFixed(2)}`,
+              marker: {
+                color: baseColor,
+                size: 10,
+                line: { color: "black", width: 2 },
+              },
+              showlegend: false,
+            });
+          });
+
+          const isDark =
+            document.documentElement.getAttribute("data-theme") === "dark";
+
+          // Determine legend position based on screen size
+          const isSmallScreen = window.innerWidth <= 768;
+
+          const layout = {
+            title: {
+              text: `f(x) = ${funcStr}`,
+              font: {
+                family: "JetBrains Mono, monospace",
+                size: 18,
+                color: isDark ? "#e4e8f0" : "#0f172a",
+              },
+            },
+            xaxis: {
+              title: "x",
+              range: [xMin, xMax],
+              gridcolor: isDark ? "#374151" : "#e2e8f0",
+              zerolinecolor: isDark ? "#6366f1" : "#4f46e5",
+              color: isDark ? "#e4e8f0" : "#0f172a",
+            },
+            yaxis: {
+              title: "y",
+              range: [yMin, yMax],
+              gridcolor: isDark ? "#374151" : "#e2e8f0",
+              zerolinecolor: isDark ? "#6366f1" : "#4f46e5",
+              color: isDark ? "#e4e8f0" : "#0f172a",
+            },
+            plot_bgcolor: isDark ? "#1a1f3a" : "#ffffff",
+            paper_bgcolor: isDark ? "#1a1f3a" : "#ffffff",
+            font: { color: isDark ? "#e4e8f0" : "#0f172a" },
+            showlegend: showLegend,
+            legend: {
+              bgcolor: isDark
+                ? "rgba(26, 31, 58, 0.8)"
+                : "rgba(255, 255, 255, 0.8)",
+              bordercolor: isDark ? "#6366f1" : "#4f46e5",
+              borderwidth: 1,
+              // Position legend at top for small screens
+              orientation: isSmallScreen ? "h" : "v",
+              x: isSmallScreen ? 0.5 : 1.02,
+              y: isSmallScreen ? 1.25 : 1,
+              xanchor: isSmallScreen ? "center" : "left",
+              yanchor: isSmallScreen ? "top" : "top",
+            },
+            margin: {
+              t: isSmallScreen ? 150 : 80,
+              b: 60,
+              l: 60,
+              r: isSmallScreen ? 20 : 200,
+            },
+          };
+
+          const config = {
+            responsive: true,
+            displayModeBar: true,
+            displaylogo: false,
+          };
+
+          Plotly.newPlot("graph", traces, layout, config);
+          updateAnalysis();
+        } catch (e) {
+          showError(`Error: ${e.message}`);
+        }
+      }
+
+      function updateAnalysis() {
+        if (!currentAnalyzer) return;
+
+        const analysisGrid = document.getElementById("analysis-grid");
+        analysisGrid.innerHTML = "";
+
+        // Function expressions
+        const expressionsCard = document.createElement("div");
+        expressionsCard.className = "analysis-card";
+        expressionsCard.innerHTML = `
+                <h3>Function Expressions</h3>
+                <pre><span class="math-expr">f(x) = ${currentAnalyzer.funcStr}</span></pre>
+                <pre><span class="math-expr">f'(x) = ${currentAnalyzer.derivNode.toString()}</span></pre>
+                <pre><span class="math-expr">f''(x) = ${currentAnalyzer.secondDerivNode.toString()}</span></pre>
+            `;
+        analysisGrid.appendChild(expressionsCard);
+
+        // Critical points
+        const criticalPoints = currentAnalyzer.findCriticalPoints();
+        const criticalCard = document.createElement("div");
+        criticalCard.className = "analysis-card";
+        criticalCard.innerHTML = `
+                <h3>Critical Points (${criticalPoints.length})</h3>
+                <pre>${
+                  criticalPoints.length > 0
+                    ? criticalPoints
+                        .map((p) => `(${p.x.toFixed(4)}, ${p.y.toFixed(4)})`)
+                        .join("\n")
+                    : "None found"
+                }</pre>
+            `;
+        analysisGrid.appendChild(criticalCard);
+
+        // Roots
+        const roots = currentAnalyzer.findRoots();
+        const rootsCard = document.createElement("div");
+        rootsCard.className = "analysis-card";
+        rootsCard.innerHTML = `
+                <h3>Roots / Zeros (${roots.length})</h3>
+                <pre>${
+                  roots.length > 0
+                    ? roots
+                        .map(
+                          (r) =>
+                            `x = <span class="value">${r.toFixed(4)}</span>`,
+                        )
+                        .join("\n")
+                    : "None found"
+                }</pre>
+            `;
+        analysisGrid.appendChild(rootsCard);
+
+        // Inflection points
+        const inflectionPoints = currentAnalyzer.findInflectionPoints();
+        const inflectionCard = document.createElement("div");
+        inflectionCard.className = "analysis-card";
+        inflectionCard.innerHTML = `
+                <h3>Inflection Points (${inflectionPoints.length})</h3>
+                <pre>${
+                  inflectionPoints.length > 0
+                    ? inflectionPoints
+                        .map((p) => `(${p.x.toFixed(4)}, ${p.y.toFixed(4)})`)
+                        .join("\n")
+                    : "None found"
+                }</pre>
+            `;
+        analysisGrid.appendChild(inflectionCard);
+
+        // Undefined values
+        const undefinedValues = currentAnalyzer.findUndefinedValues();
+        const undefinedCard = document.createElement("div");
+        undefinedCard.className = "analysis-card";
+        undefinedCard.innerHTML = `
+                <h3>Undefined Values (Holes) (${undefinedValues.length})</h3>
+                <pre>${
+                  undefinedValues.length > 0
+                    ? undefinedValues
+                        .map(
+                          (p) =>
+                            `x = <span class="value">${p.x.toFixed(4)}</span>, limit = ${p.y.toFixed(4)}`,
+                        )
+                        .join("\n")
+                    : "None found"
+                }</pre>
+            `;
+        analysisGrid.appendChild(undefinedCard);
+
+        // Asymptotes
+        const verticalAsymptotes = currentAnalyzer.findVerticalAsymptotes();
+        const horizontalAsymptote = currentAnalyzer.findHorizontalAsymptote();
+        const obliqueAsymptote = currentAnalyzer.findObliqueAsymptote();
+        const asymptotesCard = document.createElement("div");
+        asymptotesCard.className = "analysis-card";
+        let asymptoteText = "";
+        if (verticalAsymptotes.length > 0) {
+          asymptoteText += `Vertical:\n${verticalAsymptotes.map((a) => `x = <span class="value">${a.toFixed(4)}</span>`).join("\n")}\n\n`;
+        }
+        if (horizontalAsymptote !== null) {
+          asymptoteText += `Horizontal:\ny = <span class="value">${horizontalAsymptote.toFixed(4)}</span>\n\n`;
+        }
+        if (obliqueAsymptote !== null) {
+          asymptoteText += `Oblique:\ny = <span class="value">${obliqueAsymptote.m.toFixed(4)}x + ${obliqueAsymptote.b.toFixed(4)}</span>`;
+        }
+        if (!asymptoteText) {
+          asymptoteText = "None found";
+        }
+        asymptotesCard.innerHTML = `
+                <h3>Asymptotes</h3>
+                <pre>${asymptoteText}</pre>
+            `;
+        analysisGrid.appendChild(asymptotesCard);
+
+        // Domain
+        const domainCard = document.createElement("div");
+        domainCard.className = "analysis-card";
+        domainCard.innerHTML = `
+                <h3>Domain</h3>
+                <pre>All real numbers ℝ
+(computed over [${currentAnalyzer.xRange[0]}, ${currentAnalyzer.xRange[1]}])</pre>
+            `;
+        analysisGrid.appendChild(domainCard);
+      }
+
+      function showError(message) {
+        const analysisGrid = document.getElementById("analysis-grid");
+        analysisGrid.innerHTML = `<div class="error-message">${message}</div>`;
+      }
+
+      // Event listeners
+      document
+        .getElementById("function-input")
+        .addEventListener("input", updateGraph);
+      document.getElementById("x-min").addEventListener("input", updateGraph);
+      document.getElementById("x-max").addEventListener("input", updateGraph);
+      document.getElementById("y-min").addEventListener("input", updateGraph);
+      document.getElementById("y-max").addEventListener("input", updateGraph);
+
+      document
+        .querySelectorAll('.control-item input[type="checkbox"]')
+        .forEach((checkbox) => {
+          checkbox.addEventListener("change", updateGraph);
+        });
+
+      // Allow Enter key to add tangent
+      document
+        .getElementById("tangent-x")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            addTangent();
+          }
+        });
+
+      // Update graph on window resize for legend repositioning
+      window.addEventListener("resize", updateGraph);
+
+      // Check for horizontal overflow
+      function checkOverflow() {
+        if (document.body.scrollWidth > document.body.clientWidth) {
+          document.body.classList.add("has-overflow");
+        } else {
+          document.body.classList.remove("has-overflow");
+        }
+      }
+
+      // Check overflow on load and resize
+      window.addEventListener("load", checkOverflow);
+      window.addEventListener("resize", checkOverflow);
+
+      // Initial graph
+      updateGraph();
+    </script>
+  </body>
+</html>
